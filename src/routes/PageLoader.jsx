@@ -1,0 +1,11 @@
+import { Skeleton } from '@/components/ui/skeleton.jsx'
+
+export function PageLoader() {
+  return (
+    <div className="space-y-4 p-4">
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-32 w-full" />
+      <Skeleton className="h-32 w-full" />
+    </div>
+  )
+}
