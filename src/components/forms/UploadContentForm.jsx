@@ -91,7 +91,7 @@ export function UploadContentForm() {
   })
 
   return (
-    <form onSubmit={onSubmit} className="mx-auto max-w-xl space-y-6">
+    <form onSubmit={onSubmit} className="mx-auto max-w-2xl space-y-6">
       <div className="space-y-2">
         <Label htmlFor="title">Title</Label>
         <Input id="title" placeholder="Lesson title" {...form.register('title')} />

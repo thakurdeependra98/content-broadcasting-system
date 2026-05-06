@@ -18,10 +18,6 @@ export default function PrincipalPendingApprovals() {
   const [rejectOpen, setRejectOpen] = useState(false)
   const [rejectTargetId, setRejectTargetId] = useState(/** @type {string | null} */ (null))
 
-  useEffect(() => {
-    document.title = 'Principal — Approvals'
-  }, [])
-
   const openReject = (id) => {
     setRejectTargetId(id)
     setRejectOpen(true)
@@ -66,12 +62,12 @@ export default function PrincipalPendingApprovals() {
         <EmptyState title="No pending items" description="You're all caught up." />
       ) : null}
       {!loading && !error && items && items.length > 0 ? (
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-4 lg:grid-cols-3 md:grid-cols-2">
           {items.map((item) => (
             <Card key={item.id}>
               <CardHeader>
                 <CardTitle className="text-base leading-snug">{item.title}</CardTitle>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-base text-muted-foreground">
                   {item.subject} · {item.teacherName}
                 </p>
               </CardHeader>
