@@ -49,3 +49,12 @@ Content Broadcasting System — Frontend notes
 - “Live” content = first matching approved item for the teacher whose [startTime, endTime] contains now (deterministic pick among overlaps).
 - Date/time inputs use `datetime-local`; values are converted to ISO on submit.
 - Tailwind v4 (Oxide) was not used in this workspace because optional native bindings failed to install; Tailwind v3 + PostCSS is used instead with the same UI patterns.
+14) Optional Features (Bonus) 
+● React Query / TanStack Query 
+● Dark mode 
+● Drag-and-drop upload 
+● Pagination 
+● Polling / auto-refresh 
+● Reusable components 
+● Skeleton loaders 
+● Protected routes 
