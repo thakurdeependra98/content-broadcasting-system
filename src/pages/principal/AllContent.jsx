@@ -43,10 +43,6 @@ export default function PrincipalAllContent() {
   const { result, loading, error, reload } = useAllContentList(params)
 
   useEffect(() => {
-    document.title = 'Principal — All Content'
-  }, [])
-
-  useEffect(() => {
     const t = window.setTimeout(() => setPage(1), 0)
     return () => window.clearTimeout(t)
   }, [status, debouncedQ])

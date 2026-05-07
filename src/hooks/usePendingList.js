@@ -1,31 +1,16 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import * as approvalService from '@/services/approval.service.js'
 
 export function usePendingList() {
-  const [items, setItems] = useState(/** @type {object[] | null} */ (null))
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(/** @type {string | null} */ (null))
+  const query = useQuery({
+    queryKey: ['pending-approvals'],
+    queryFn: () => approvalService.getPendingApprovals(),
+  })
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await approvalService.getPendingApprovals()
-      setItems(Array.isArray(data) ? data : [])
-    } catch (e) {
-      setItems(null)
-      setError(e instanceof Error ? e.message : 'Failed to load approvals')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    const t = window.setTimeout(() => {
-      void load()
-    }, 0)
-    return () => window.clearTimeout(t)
-  }, [load])
-
-  return { items, loading, error, reload: load }
+  return {
+    items: Array.isArray(query.data) ? query.data : [],
+    loading: query.isLoading || query.isFetching,
+    error: query.error instanceof Error ? query.error.message : null,
+    reload: query.refetch,
+  }
 }

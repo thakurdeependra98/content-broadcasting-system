@@ -1,0 +1,51 @@
+Content Broadcasting System — Frontend notes
+==============================================
+
+1) Project structure
+---------------------
+- src/components/ui       — Reusable primitives (Button, Card, Dialog, …) in a shadcn-style pattern.
+- src/components/common   — App-level UI (StatCard, EmptyState, layouts guards, etc.).
+- src/components/layouts  — AppLayout (authenticated shell), PublicLayout (live page).
+- src/components/forms    — Feature forms (upload) using React Hook Form + Zod.
+- src/pages               — Route-level screens (auth, teacher, principal, public live, 404).
+- src/routes              — AppRouter, loaders, root redirect.
+- src/services            — API surface: http.js (Axios + mock adapter), auth/content/approval services, mockBackend persistence.
+- src/hooks               — Data hooks that call services (no fetch in page components).
+- src/context             — AuthProvider + AuthContext (context in auth-context.js for fast-refresh ergonomics).
+- src/utils               — constants, validators (Zod), formatters, schedule helpers, file helpers.
+
+2) Authentication flow
+----------------------
+- On app load, AuthProvider reads TOKEN_KEY + USER_KEY from localStorage and restores `user` synchronously (lazy useState initializer).
+- Login calls auth.service → POST auth/login via Axios; mock adapter validates credentials and returns `{ token, user }`.
+- Token and user JSON are stored in localStorage; subsequent Axios requests attach `Authorization: Bearer <token>` via request interceptor (http.js).
+- Logout clears localStorage keys and `user` in context.
+
+3) Role-based routing
+---------------------
+- Public: `/login`, `/live/:teacherId`.
+- Teacher area: `/teacher/*` wrapped by ProtectedRoute + RoleGuard([teacher]); layout AppLayout with teacher nav.
+- Principal area: `/principal/*` same with principal role.
+- Wrong role hitting the other area’s URL is redirected home for that role by RoleGuard.
+- Root `/` redirects to the correct dashboard when authenticated, else `/login`.
+
+4) API integration approach
+---------------------------
+- All network-shaped calls go through Axios instance `api` in services/http.js.
+- A custom default adapter simulates latency and dispatches to mockBackend (localStorage) by URL — so components never import mockBackend directly.
+- auth.service.js, content.service.js, approval.service.js are the only modules pages/hooks should use for domain operations.
+- To connect a real backend: remove/replace the custom adapter, set VITE_API_URL, and keep the same service method shapes (or adjust services only).
+
+5) State management approach
+----------------------------
+- Auth: React Context (AuthProvider).
+- Screen data: small custom hooks (useDashboardStats, useMyContentList, usePendingList, useAllContentList, useLiveBroadcast) that own loading/error/data and call services.
+- Forms: local component state + React Hook Form; upload mutation wrapped in useContentUpload hook.
+
+6) Assumptions / limitations
+----------------------------
+- Persistence is browser localStorage only; clearing storage resets the DB and re-seeds ~600 items + demo users.
+- Seeded uploads use a tiny shared GIF data URL to avoid blowing the ~5MB localStorage quota; user uploads store real image data URLs (large files may still hit quota — assignment tradeoff).
+- “Live” content = first matching approved item for the teacher whose [startTime, endTime] contains now (deterministic pick among overlaps).
+- Date/time inputs use `datetime-local`; values are converted to ISO on submit.
+- Tailwind v4 (Oxide) was not used in this workspace because optional native bindings failed to install; Tailwind v3 + PostCSS is used instead with the same UI patterns.

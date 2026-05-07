@@ -19,6 +19,7 @@ import { Label } from '@/components/ui/label.jsx'
 import { useAuth } from '@/hooks/useAuth.js'
 import { loginSchema } from '@/utils/validators.js'
 import { ROLES } from '@/utils/constants.js'
+import { ThemeToggle } from '@/components/common/ThemeToggle.jsx'
 
 export default function Login() {
   const { user, login } = useAuth()
@@ -35,10 +36,6 @@ export default function Login() {
     form.setValue('email', email, { shouldValidate: true, shouldDirty: true })
     form.setValue('password', password, { shouldValidate: true, shouldDirty: true })
   }
-
-  useEffect(() => {
-    document.title = 'Sign in — Content Broadcasting'
-  }, [])
 
   if (user) {
     if (user.role === ROLES.TEACHER) {
@@ -66,7 +63,10 @@ export default function Login() {
   })
 
   return (
-    <div className="bg-background">
+    <div className="relative bg-background">
+      <div className="absolute right-4 top-4 z-20">
+        <ThemeToggle className="border-border/70 bg-background/70 shadow-sm backdrop-blur" />
+      </div>
       <div className="grid overflow-hidden h-screen border border-border bg-card shadow-[0_28px_90px_-42px_rgba(29,78,216,0.45)] lg:grid-cols-[1.05fr_0.95fr]">
         <section className="relative overflow-hidden bg-primary px-6 py-8 text-primary-foreground sm:px-8 lg:flex lg:flex-col lg:px-10 lg:py-10">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(255,255,255,0.34),transparent_32%),radial-gradient(circle_at_bottom_left,rgba(255,255,255,0.16),transparent_28%)]" />

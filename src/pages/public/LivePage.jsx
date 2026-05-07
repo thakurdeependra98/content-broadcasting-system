@@ -13,18 +13,12 @@ export default function LivePage() {
   const { teacherId } = useParams()
   const { data, loading, error, refresh } = useLiveBroadcast(teacherId)
 
-  useEffect(() => {
-    document.title = `Live — ${teacherId ?? ''}`
-  }, [teacherId])
 
   return (
     <div>
       <div className="mb-8 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-          <Radio className="h-6 w-6 text-primary" aria-hidden />
-        </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Live broadcast</h1>
+          <h1 className="text-2xl font-bold tracking-wide">Live broadcast</h1>
           <p className="text-sm text-muted-foreground">
             Teacher ID: <span className="font-mono">{teacherId}</span> · Refreshes every 10s
           </p>

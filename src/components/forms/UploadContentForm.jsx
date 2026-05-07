@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { toast } from 'sonner'
@@ -20,8 +20,10 @@ import { useContentUpload } from '@/hooks/useContentUpload.js'
 
 export function UploadContentForm() {
   const { submit, loading: uploading } = useContentUpload()
+  const fileInputRef = useRef(/** @type {HTMLInputElement | null} */ (null))
   const [file, setFile] = useState(/** @type {File | null} */ (null))
   const [preview, setPreview] = useState('')
+  const [dragActive, setDragActive] = useState(false)
   const form = useForm({
     resolver: zodResolver(uploadContentSchema),
     defaultValues: {
@@ -34,14 +36,12 @@ export function UploadContentForm() {
     },
   })
 
-  const onPickFile = async (e) => {
-    const f = e.target.files?.[0] ?? null
+  const setSelectedFile = async (f) => {
     const v = validateUploadFile(f)
     if (!v.ok) {
       toast.error(v.message)
       setFile(null)
       setPreview('')
-      e.target.value = ''
       return
     }
     setFile(f)
@@ -52,6 +52,30 @@ export function UploadContentForm() {
       toast.error('Could not preview file')
       setPreview('')
     }
+  }
+
+  const clearFileInput = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }
+
+  const onPickFile = async (e) => {
+    const f = e.target.files?.[0] ?? null
+    await setSelectedFile(f)
+    clearFileInput()
+  }
+
+  const onDrop = async (e) => {
+    e.preventDefault()
+    setDragActive(false)
+    const f = e.dataTransfer.files?.[0] ?? null
+    await setSelectedFile(f)
+    clearFileInput()
+  }
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click()
   }
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -142,12 +166,45 @@ export function UploadContentForm() {
 
       <div className="space-y-2">
         <Label htmlFor="file">File (JPG, PNG, GIF — max 10MB)</Label>
-        <Input id="file" type="file" accept="image/jpeg,image/png,image/gif" onChange={onPickFile} />
-        {file ? (
-          <p className="text-xs text-muted-foreground">
-            Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)
-          </p>
-        ) : null}
+        <div
+          className={`rounded-2xl border-2 border-dashed p-5 transition-colors ${
+            dragActive
+              ? 'border-primary bg-primary/5'
+              : 'border-border bg-muted/30 hover:border-primary/50'
+          }`}
+          onDragEnter={() => setDragActive(true)}
+          onDragOver={(e) => {
+            e.preventDefault()
+            setDragActive(true)
+          }}
+          onDragLeave={() => setDragActive(false)}
+          onDrop={onDrop}
+        >
+          <input
+            ref={fileInputRef}
+            id="file"
+            type="file"
+            accept="image/jpeg,image/png,image/gif"
+            className="hidden"
+            onChange={onPickFile}
+          />
+          <div className="flex flex-col items-center justify-center gap-3 text-center">
+            <p className="text-sm font-medium text-foreground">
+              Drag and drop an image here, or choose a file.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              JPG, PNG, or GIF up to 10MB.
+            </p>
+            <Button type="button" variant="outline" onClick={openFilePicker}>
+              Choose file
+            </Button>
+            {file ? (
+              <p className="text-xs text-muted-foreground">
+                Selected: {file.name} ({(file.size / 1024).toFixed(1)} KB)
+              </p>
+            ) : null}
+          </div>
+        </div>
         {preview ? <FilePreview src={preview} alt="Upload preview" className="mt-2" /> : null}
       </div>
 
